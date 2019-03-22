@@ -37,7 +37,7 @@
 <div class="container">
 	<h2>Welcome to the Dashboard!</h2>
 
-	{% if data.id %}
+	{% if show_glo_board %}
 	<h3>Glo Board: {{data.name}}</h3>
 		{% for column in data.columns %}
 		<h4>Column: {{column.name}}</h4>
@@ -50,11 +50,24 @@
 	<br/>
 	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
 	<br/>
+	{% elif show_zenhub_board %}
+	<h3>ZenHub Board: {{repo_data.name}}</h3>
+		{% for pipeline in zenhub_data.pipelines %}
+		<h4>Pipeline: {{pipeline.name}}</h4>
+		<ul>
+			{% for issue in pipeline.issues %}
+			<li>{{issue.id}}</li>
+			{% endfor %}
+		</ul>
+		{% endfor %}
+	<br/>
+	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
+	<br/>
 	{% else %}
 	<h3>Your Glo Boards</h3>
 	<ul>
 		{% for board in data %}
-		<li><a href="/dashboard/{{board.id}}">{{board.name}}</a></li>
+		<li><a href="/dashboard/glo/{{board.id}}">{{board.name}}</a></li>
 		{% else %}
 		<li><em>No Glo Boards Found!</em></li>
 		{% endfor %}
@@ -74,11 +87,11 @@
 	<!-- flash implementation end -->
 	<h3>Your ZenHub Boards</h3>
 	<ul>
-			{% for board in zenhub_boards %}
-			<li>{{board.repo_name}}</li>
-			{% else %}
-			<li><em>No ZenHub Workspaces Found!</em></li>
-			{% endfor %}
+		{% for board in zenhub_boards %}
+		<li><a href="/dashboard/zenhub/{{board.repo_owner}}/{{board.repo_id}}">{{board.repo_name}}</a></li>
+		{% else %}
+		<li><em>No ZenHub Workspaces Found!</em></li>
+		{% endfor %}
 	</ul>
 	<a href="/dashboard?refresh"><button>Refresh</button></a>
 	<br/><br/>
@@ -87,7 +100,7 @@
 	{% if not github %}
 	<form action="/login-github"><input type="submit" value="Link to GitHub" /></form>
 	{% else %}
-	<strong>Connected with GitHub</strong>
+	<strong>Connected with GitHub - {{ session.github_user_login }}</strong>
 	{% endif %}
 	<br/><br/>
 	{% if not zenhub %}

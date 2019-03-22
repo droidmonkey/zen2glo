@@ -76,6 +76,11 @@ def authorized(oauth_token):
         return redirect(next_url)
 
     session['github_token'] = oauth_token
+
+    github_user = github.get('/user')
+    session['github_user_id'] = github_user['id']
+    session['github_user_login'] = github_user['login']
+
     return redirect(next_url)
 
 @app.route('/login-zenhub', methods=['POST'])
@@ -96,14 +101,23 @@ def dashboard():
         github=has_github_access(), zenhub=has_zenhub_access(),
         zenhub_boards=find_zenhub_boards('refresh' in request.args))
 
-@app.route('/dashboard/<board_id>')
-def show_board(board_id):
+@app.route('/dashboard/glo/<board_id>')
+def show_glo_board(board_id):
     if not has_glo_access():
         return redirect(url_for('root'))
 
     payload = {'access_token' : session['glo_token'], 'fields' : 'name,columns'}
     r = requests.get(glo_api + '/boards/' + board_id, params=payload)
-    return render_template('dashboard.html', data=r.json())
+    return render_template('dashboard.html', show_glo_board=1, data=r.json())
+
+@app.route('/dashboard/zenhub/<repo_owner>/<repo_id>')
+def show_zenhub_board(repo_owner, repo_id):
+    if not has_zenhub_access() or not has_github_access():
+        return redirect(url_for('root'))
+
+    repo = github.get('/repos/{}/{}'.format(repo_owner, repo_id))
+    r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo_id, session['zenhub_token']))
+    return render_template('dashboard.html', show_zenhub_board=1, repo_data=repo, zenhub_data=r.json())
 
 @app.route('/logout')
 def logout():
@@ -131,9 +145,9 @@ def find_zenhub_boards(force=False):
             r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo['id'], session['zenhub_token']))
             board = r.json()
             if is_zenhub_board_valid(board):
-                boards.append({'repo_name' : repo['full_name'], 'repo_id' : repo['id']})
+                boards.append({'repo_name' : repo['full_name'], 'repo_id' : repo['id'], 'repo_owner' : repo['owner']['id']})
                 
-    session['zenhub_boards'] = boards
+        session['zenhub_boards'] = boards
     return boards
 
 @github.access_token_getter

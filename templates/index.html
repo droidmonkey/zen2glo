@@ -1,0 +1,16 @@
+<html>
+   <head>
+		<script type = "text/javascript" src = "{{ url_for('static', filename = 'hello.js') }}" ></script>
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	</head>
+   
+	<body>
+		<form action="https://app.gitkraken.com/oauth/authorize" method="get">
+			<input type="hidden" name="response_type" value="code" />
+			<input type="hidden" name="client_id" value="{{client_id}}" />
+			<input type="hidden" name="state" value="{{state}}" />
+			<input type="hidden" name="scope" value="{{scope}}" />
+			<input type="submit" value="Authorize App" />
+		</form>
+	</body>
+</html>

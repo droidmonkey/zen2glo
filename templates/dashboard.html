@@ -1,0 +1,105 @@
+{% extends "bootstrap/base.html" %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+{% endblock %}
+{% block title %}Flasky{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle"data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">GloTesting</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="/">Home</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h2>Welcome to the Dashboard!</h2>
+
+	{% if data.id %}
+	<h3>Glo Board: {{data.name}}</h3>
+		{% for column in data.columns %}
+		<h4>Column: {{column.name}}</h4>
+		<ul>
+			{% for card in column.cards %}
+			<li>{{card.title}}</li>
+			{% endfor %}
+		</ul>
+		{% endfor %}
+	<br/>
+	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
+	<br/>
+	{% else %}
+	<h3>Your Glo Boards</h3>
+	<ul>
+		{% for board in data %}
+		<li><a href="/dashboard/{{board.id}}">{{board.name}}</a></li>
+		{% else %}
+		<li><em>No Glo Boards Found!</em></li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+
+	{% if github and zenhub %}
+	<!-- flash implementation --><p>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			{% for message in messages %}
+				{{ message }}
+			{% endfor %}
+		{% endif %}
+		{% endwith %}
+	</p>
+	<!-- flash implementation end -->
+	<h3>Your ZenHub Boards</h3>
+	<ul>
+			{% for board in zenhub_boards %}
+			<li>{{board.repo_name}}</li>
+			{% else %}
+			<li><em>No ZenHub Workspaces Found!</em></li>
+			{% endfor %}
+	</ul>
+	<a href="/dashboard?refresh"><button>Refresh</button></a>
+	<br/><br/>
+	{% endif %}
+
+	{% if not github %}
+	<form action="/login-github"><input type="submit" value="Link to GitHub" /></form>
+	{% else %}
+	<strong>Connected with GitHub</strong>
+	{% endif %}
+	<br/><br/>
+	{% if not zenhub %}
+	<form action="/login-zenhub" method="post">
+	ZenHub API Token: <input type="text" name="zenhub_token" />
+	<input type="submit" value="Link to ZenHub" />
+	</form>
+	{% else %}
+	<strong>Connected with ZenHub</strong>
+	{% endif %}
+
+	<br/><br/>
+	<a href="/logout"><button>Logout</button></a>
+</div>
+{% endblock %}

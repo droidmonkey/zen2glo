@@ -1,16 +1,58 @@
-<html>
-   <head>
-		<script type = "text/javascript" src = "{{ url_for('static', filename = 'hello.js') }}" ></script>
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-	</head>
-   
-	<body>
-		<form action="https://app.gitkraken.com/oauth/authorize" method="get">
+{% extends "bootstrap/base.html" %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+{% endblock %}
+{% block title %}Zen2Glo{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle"data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">Zen2Glo</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a onclick="document.getElementById('AuthGloAppId').submit();">Start: Authorize Glo App</a></li>
+				<li><a href='/logout'>Logout All Accounts</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block content %}
+	<h1>Zen2Glo Migration</h1>
+	<h2>Import ZenHub Boards directly to your Glo Boards</h2>
+	<h2><a onclick="document.getElementById('AuthGloAppId').submit();">Start by pressing 'Authorize Glo App' above!</a></h2>
+	<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
+		<input type="hidden" name="response_type" value="code" />
+		<input type="hidden" name="client_id" value="{{client_id}}" />
+		<input type="hidden" name="state" value="{{state}}" />
+		<input type="hidden" name="scope" value="{{scope}}" />
+	</form>
+	<!--
+	<ul>
+		<li>
+			<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
 			<input type="hidden" name="response_type" value="code" />
 			<input type="hidden" name="client_id" value="{{client_id}}" />
 			<input type="hidden" name="state" value="{{state}}" />
 			<input type="hidden" name="scope" value="{{scope}}" />
-			<input type="submit" value="Authorize App" />
+			<input type="submit" value="Authorize Glo App" />
 		</form>
-	</body>
-</html>
+		</li>
+	</ul>-->
+{% endblock %}

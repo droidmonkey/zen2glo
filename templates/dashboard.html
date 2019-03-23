@@ -9,8 +9,26 @@
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<script>
+	function emptyOrSubmit() {
+    	var x;
+    	x = document.getElementById("ZenHubTokenFieldId").value;
+    	if (x == "") {
+        	alert("ZenHub API Access Token cannot be empty.");
+        	return false;
+		}
+		else{
+			document.getElementById('zenhubLoginId').submit()
+		};
+	}
+</script>
+<style>
+.boxed {
+	border: 1px solid red ;
+  } 
+</style>
 {% endblock %}
-{% block title %}Flasky{% endblock %}
+{% block title %}Zen2Glo{% endblock %}
 
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
@@ -22,11 +40,22 @@
 				span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="/">GloTesting</a>
+			<a class="navbar-brand" href="/">Zen2Glo</a>
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
-				<li><a href="/">Home</a></li>
+				<li><a href='/dashboard'><font color="green">Glo App: Authorized</font></a></li>
+				{% if not github %}
+				<li><a onclick="document.getElementById('githubLoginId').submit();"><font color="red">Authorize GitHub App</font></a></li>
+				{% else %}
+				<li><a  href='/dashboard'><font color="green">GitHub App: Authorized</font></a></li>
+				{% endif %}
+				{% if not zenhub %}
+				<li><a onclick="emptyOrSubmit();"><font color="red">Authorize ZenHub App</font></a></li>
+				{% else %}
+				<li><a  href='/dashboard'><font color="green">ZenHub App: Authorized</font></a></li>
+				{% endif %}
+				<li><a href='/logout'>Logout All Accounts</a></li>
 			</ul>
 		</div>
 	</div>
@@ -36,7 +65,28 @@
 {% block content %}
 <div class="container">
 	<h2>Welcome to the Dashboard!</h2>
+	<h3>Connection Status:</h3>
+	<p>Glo Boards: <font color="green">Authorized</font></p>
+	{% if github %}
+		<p>GitHub App: <font color="green">Authorized</font>  (Connected to GitHub: {{ session.github_user_login }})</p>
+	{% else %}
+		<p>GitHub App: <a onclick="document.getElementById('githubLoginId').submit();"><font color="red">Not Authorized</font></a></p>
+		<form id='githubLoginId' action="/login-github" ></form>
+	{% endif %}
+	{% if zenhub %}
+		<p>ZenHub App: <font color="green">Authorized</font></p>
+	{% else %}
+		<p>ZenHub App: <a onclick="emptyOrSubmit();"><font color="red">Not Authorized</font></a></p>
+		<div class='boxed'>
+			<p>Login to ZenHub and generate a ZenHub API Access Token here:</p>
+			<p><a target='_blank' rel='noopener noreferrer' href='https://app.zenhub.com/dashboard/tokens'>https://app.zenhub.com/dashboard/tokens</a></p>
+			<p>Enter the ZenHub API Access Token into the box below:</p>
+			<form id='zenhubLoginId' action="/login-zenhub" method="post">
+			ZenHub API Access Token: <input type="text" name="zenhub_token" id='ZenHubTokenFieldId' />
+		</div>
+	{% endif %}
 
+	</br></br>
 	{% if show_glo_board %}
 	<h3>Glo Board: {{data.name}}</h3>
 		{% for column in data.columns %}
@@ -75,16 +125,7 @@
 	{% endif %}
 
 	{% if github and zenhub %}
-	<!-- flash implementation --><p>
-		{% with messages = get_flashed_messages() %}
-		{% if messages %}
-			{% for message in messages %}
-				{{ message }}
-			{% endfor %}
-		{% endif %}
-		{% endwith %}
-	</p>
-	<!-- flash implementation end -->
+
 	<h3>Your ZenHub Boards</h3>
 	<ul>
 		{% for board in zenhub_boards %}
@@ -97,26 +138,5 @@
 	<br/><br/>
 	{% endif %}
 
-	{% if not github %}
-	<form action="/login-github"><input type="submit" value="Link to GitHub" /></form>
-	{% else %}
-	<strong>Connected with GitHub - {{ session.github_user_login }}</strong>
-	{% endif %}
-	<br/><br/>
-	{% if not zenhub %}
-	<p>Login to ZenHub and generate a ZenHub API Access Token here:</p>
-	<p><a target='_blank' rel='noopener noreferrer' href='https://app.zenhub.com/dashboard/tokens'>https://app.zenhub.com/dashboard/tokens</a></p>
-	<p>Save the ZenHub API Access Token locally and enter it into the Zen2Glo box below:</p>
-
-	<form action="/login-zenhub" method="post">
-	ZenHub API Token: <input type="text" name="zenhub_token" />
-	<input type="submit" value="Link to ZenHub" />
-	</form>
-	{% else %}
-	<strong>Connected with ZenHub</strong>
-	{% endif %}
-
-	<br/><br/>
-	<a href="/logout"><button>Logout</button></a>
 </div>
 {% endblock %}

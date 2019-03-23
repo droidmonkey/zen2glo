@@ -1,0 +1,91 @@
+<!--<html>
+    <head>
+       <script>
+        window.setTimeout(function(){
+          // Move to a new location or you can do something else
+          window.location.href = "/";
+          }, 5000);
+   
+        </script>
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    </head>
+    <body>
+        {% if LoggedOutSuccesses.gloLoggedOut %}
+        <p>Glo Boards Successfully Logged Out</p>
+        {% endif %}
+        {% if LoggedOutSuccesses.gitLoggedOut %}
+        <p>GitHub Successfully Logged Out</p>
+        {% endif %}
+        {% if LoggedOutSuccesses.zenLoggedOut %}
+        <p>ZenHub Successfully Logged Out</p>
+        {% endif %}
+        <p>Redirecting in... 5</p>
+        
+    </body>
+</html> -->
+{% extends "bootstrap/base.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<script>
+  function startTimer(duration, display) {
+    var timer = duration, seconds;
+    var end =setInterval(function () {
+      seconds = parseInt(timer % 60, 10);
+
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+
+      display.textContent =  "00:" + seconds;
+
+      if (--timer < 0) {
+          window.location.href = "/";
+          clearInterval(end);
+      }
+    }, 1000);
+  }
+
+  window.onload = function () {
+      var fiveSeconds = 5,
+      display = document.querySelector('#time');
+      startTimer(fiveSeconds, display);
+  };
+</script>
+{% endblock %}
+{% block title %}Zen2Glo{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle"data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">Zen2Glo</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+          <li><a href='/'>Home</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<h2>Logging out:</h2>  
+{% if LoggedOutSuccesses.gloLoggedOut %}
+  <p>Glo Boards Successfully Logged Out</p>
+{% endif %}
+{% if LoggedOutSuccesses.gitLoggedOut %}
+  <p>GitHub Successfully Logged Out</p>
+{% endif %}
+{% if LoggedOutSuccesses.zenLoggedOut %}
+  <p>ZenHub Successfully Logged Out</p>
+{% endif %}
+<div>Redirecting to <a href='/'>home</a> in <span id="time">00:05</span></div>
+{% endblock %}

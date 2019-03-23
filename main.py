@@ -42,10 +42,10 @@ state = os.getenv("STATEz")
 @app.route('/')
 def root():
     if has_glo_access():
-      return redirect(url_for('dashboard'))
-   
-    payload = {'client_id' : client_id, 'state' : state, 'scope' : 'board:read'}
-    return render_template('index.html', **payload)
+        return redirect(url_for('dashboard'))
+    else:
+        payload = {'client_id' : client_id, 'state' : state, 'scope' : 'board:read'}
+        return render_template('index.html', **payload)
 
 @app.route('/callback')
 def glo_callback():
@@ -121,11 +121,37 @@ def show_zenhub_board(repo_owner, repo_id):
 
 @app.route('/logout')
 def logout():
-    session.pop('glo_token', None)
-    session.pop('zenhub_token', None)
-    session.pop('github_token', None)
-    return redirect(url_for('root'))
+    gloLoggedOut = False
+    zenLoggedOut = False
+    gitLoggedOut = False
+    glo_logout = session.pop('glo_token', None)
+    zen_logout = session.pop('zenhub_token', None)
+    git_logout = session.pop('github_token', None)
+    if glo_logout is not None:
+        print('Logged out of Glo')
+        gloLoggedOut = True
 
+    if zen_logout is not None:
+        print('Logged out of ZenHub')
+        zenLoggedOut = True
+
+    if git_logout is not None:
+        print('Logged out of Github')
+        gitLoggedOut = True
+
+        
+
+    LoggedOutSuccesses = {'gloLoggedOut' : gloLoggedOut, 'zenLoggedOut' : zenLoggedOut, 'gitLoggedOut': gitLoggedOut}
+
+    #return redirect(url_for('root'))
+    return render_template('logoutSuccess.html', LoggedOutSuccesses=LoggedOutSuccesses)
+
+'''
+@app.route('/logoutSuccess')
+def logoutSuccess():
+    LoggedOutSuccesses
+    return render_template('logoutSuccess.html', **LoggedOutSuccesses)
+'''
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html',current_time=datetime.utcnow()), 404

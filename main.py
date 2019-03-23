@@ -6,6 +6,8 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
 
+import zenhub
+
 import requests
 import os
 
@@ -110,12 +112,12 @@ def show_glo_board(board_id):
     r = requests.get(glo_api + '/boards/' + board_id, params=payload)
     return render_template('dashboard.html', show_glo_board=1, data=r.json())
 
-@app.route('/dashboard/zenhub/<repo_owner>/<repo_id>')
-def show_zenhub_board(repo_owner, repo_id):
+@app.route('/dashboard/zenhub/<owner>/<repo>/<repo_id>')
+def show_zenhub_board(owner, repo, repo_id):
     if not has_zenhub_access() or not has_github_access():
         return redirect(url_for('root'))
 
-    repo = github.get('/repos/{}/{}'.format(repo_owner, repo_id))
+    repo = github.get('/repos/{}/{}'.format(owner, repo))
     r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo_id, session['zenhub_token']))
     return render_template('dashboard.html', show_zenhub_board=1, repo_data=repo, zenhub_data=r.json())
 
@@ -139,11 +141,7 @@ def logout():
         print('Logged out of Github')
         gitLoggedOut = True
 
-        
-
     LoggedOutSuccesses = {'gloLoggedOut' : gloLoggedOut, 'zenLoggedOut' : zenLoggedOut, 'gitLoggedOut': gitLoggedOut}
-
-    #return redirect(url_for('root'))
     return render_template('logoutSuccess.html', LoggedOutSuccesses=LoggedOutSuccesses)
 
 '''

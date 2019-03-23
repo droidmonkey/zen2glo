@@ -106,7 +106,7 @@
 		<h4>Pipeline: {{pipeline.name}}</h4>
 		<ul>
 			{% for issue in pipeline.issues %}
-			<li>{{issue.id}}</li>
+			<li>{{issue.issue_number}}</li>
 			{% endfor %}
 		</ul>
 		{% endfor %}
@@ -129,7 +129,7 @@
 	<h3>Your ZenHub Boards</h3>
 	<ul>
 		{% for board in zenhub_boards %}
-		<li><a href="/dashboard/zenhub/{{board.repo_owner}}/{{board.repo_id}}">{{board.repo_name}}</a></li>
+		<li><a href="/dashboard/zenhub/{{board.repo_name}}/{{board.repo_id}}">{{board.repo_name}}</a></li>
 		{% else %}
 		<li><em>No ZenHub Workspaces Found!</em></li>
 		{% endfor %}

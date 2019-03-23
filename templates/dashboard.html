@@ -104,6 +104,10 @@
 	{% endif %}
 	<br/><br/>
 	{% if not zenhub %}
+	<p>Login to ZenHub and generate a ZenHub API Access Token here:</p>
+	<p><a target='_blank' rel='noopener noreferrer' href='https://app.zenhub.com/dashboard/tokens'>https://app.zenhub.com/dashboard/tokens</a></p>
+	<p>Save the ZenHub API Access Token locally and enter it into the Zen2Glo box below:</p>
+
 	<form action="/login-zenhub" method="post">
 	ZenHub API Token: <input type="text" name="zenhub_token" />
 	<input type="submit" value="Link to ZenHub" />

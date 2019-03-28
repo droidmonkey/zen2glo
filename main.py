@@ -95,31 +95,28 @@ def login_zenhub():
     if not has_zenhub_access() and request.form.get('zenhub_token'):
         session['zenhub_token'] = request.form.get('zenhub_token')
 
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('zenhub_refresh'))
 
 @app.route('/dashboard')
 @glo_required
 def dashboard():
-    if not has_glo_access():
-        return redirect(url_for('root'))
-
     payload = {'access_token' : session['glo_token']}
     r = requests.get(glo_api + '/boards', params=payload)
     return render_template('dashboard.html', data=r.json())
 
 @app.route('/dashboard/zenhub-refresh')
-@zen_required
+@zen_required(github)
 def zenhub_refresh():
     boards = []
     if g.zenhub:
         repos = g.zenhub.get_repos()
         for repo in repos:
-            board = g.zenhub.get_board(repo["id"])
+            board = g.zenhub.get_board(repo["full_name"])
             if board.is_valid():
                 boards.append({'repo_name' : board.repo_fullname, 'repo_id' : board.repo_id})
     
     session["zenhub_boards"] = boards
-    return redirect(url_for("/dashboard"))
+    return redirect(url_for("dashboard"))
 
 @app.route('/dashboard/zenhub/<owner>/<repo>')
 @zen_required(github)

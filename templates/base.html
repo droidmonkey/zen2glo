@@ -26,16 +26,20 @@
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
-				<li><a href='/dashboard'><font color="green">Glo App: Authorized</font></a></li>
-				{% if not github %}
+				{% if not session.glo_token %}
+				<li><a onclick="document.getElementById('AuthGloAppId').submit();"><font color="red">Authorize Glo App</font></a></li>
+				{% else %}
+				<li><a href="#"><span style="color:green">Glo App: Authorized</span></a></li>
+				{% endif %}
+				{% if not session.github_token %}
 				<li><a onclick="document.getElementById('githubLoginId').submit();"><font color="red">Authorize GitHub App</font></a></li>
 				{% else %}
-				<li><a  href='/dashboard'><font color="green">GitHub App: Authorized</font></a></li>
+				<li><a href="#"><span style="color:green">GitHub App: Authorized</span></a></li>
 				{% endif %}
-				{% if not zenhub %}
+				{% if not session.zenhub_token %}
 				<li><a onclick="emptyOrSubmit();"><font color="red">Authorize ZenHub App</font></a></li>
 				{% else %}
-				<li><a  href='/dashboard'><font color="green">ZenHub App: Authorized</font></a></li>
+				<li><a href="#"><span style="color:green">ZenHub App: Authorized</span></a></li>
 				{% endif %}
 				<li><a href='/logout'>Logout All Accounts</a></li>
 			</ul>

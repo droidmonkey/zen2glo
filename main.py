@@ -28,7 +28,9 @@ app.config['GITHUB_CLIENT_SECRET'] = os.getenv('GITHUB_SECRET')
 
 github = GitHub(app)
 
+## TODO Remove glo_api below once gloBoards.py is working
 glo_api = 'https://gloapi.gitkraken.com/v1/glo'
+## TODO Remove zen_api below once zenhub.py is working
 zen_api = 'https://api.zenhub.io'
 
 # Glo API Credentials for Jon
@@ -36,6 +38,7 @@ zen_api = 'https://api.zenhub.io'
 #client_secret = os.getenv("CLIENT_SECRETj")
 #state = os.getenv("STATEj")
 
+## TODO Remove glo api credentials below once gloBoards.py is working
  # Glo API Credentials for Z
 client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")

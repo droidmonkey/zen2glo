@@ -1,28 +1,3 @@
-<!--<html>
-    <head>
-       <script>
-        window.setTimeout(function(){
-          // Move to a new location or you can do something else
-          window.location.href = "/";
-          }, 5000);
-   
-        </script>
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    </head>
-    <body>
-        {% if LoggedOutSuccesses.gloLoggedOut %}
-        <p>Glo Boards Successfully Logged Out</p>
-        {% endif %}
-        {% if LoggedOutSuccesses.gitLoggedOut %}
-        <p>GitHub Successfully Logged Out</p>
-        {% endif %}
-        {% if LoggedOutSuccesses.zenLoggedOut %}
-        <p>ZenHub Successfully Logged Out</p>
-        {% endif %}
-        <p>Redirecting in... 5</p>
-        
-    </body>
-</html> -->
 {% extends "bootstrap/base.html" %}
 
 {% block head %}
@@ -78,14 +53,16 @@
 
 {% block content %}
 <h2>Logging out:</h2>  
-{% if LoggedOutSuccesses.gloLoggedOut %}
-  <p>Glo Boards Successfully Logged Out</p>
-{% endif %}
-{% if LoggedOutSuccesses.gitLoggedOut %}
-  <p>GitHub Successfully Logged Out</p>
-{% endif %}
-{% if LoggedOutSuccesses.zenLoggedOut %}
-  <p>ZenHub Successfully Logged Out</p>
-{% endif %}
+<ul>
+  {% if LoggedOutSuccesses.gloLoggedOut %}
+    <li><p>Glo Boards Successfully Logged Out</p></li>
+  {% endif %}
+  {% if LoggedOutSuccesses.gitLoggedOut %}
+    <li><p>GitHub Successfully Logged Out</p></li>
+  {% endif %}
+  {% if LoggedOutSuccesses.zenLoggedOut %}
+    <li><p>ZenHub Successfully Logged Out</p></li>
+  {% endif %}
+</ul>
 <div>Redirecting to <a href='/'>home</a> in <span id="time">00:05</span></div>
 {% endblock %}

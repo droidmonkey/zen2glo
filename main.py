@@ -52,7 +52,7 @@ def root():
     if has_glo_access():
         return redirect(url_for('dashboard'))
     else:
-        return render_template('index.html', ****gloBoardsInst.payload)
+        return render_template('index.html', **gloBoardsInst.payload)
 
 @app.route('/callback')
 def glo_callback():

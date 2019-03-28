@@ -103,25 +103,27 @@ def dashboard():
 
     payload = {'access_token' : session['glo_token']}
     r = requests.get(glo_api + '/boards', params=payload)
-    return render_template('dashboard.html', data=r.json(), 
-        github=has_github_access(), zenhub=has_zenhub_access(),
-        zenhub_boards=find_zenhub_boards('refresh' in request.args))
+    return render_template('dashboard.html', data=r.json())
 
-@app.route('/dashboard/glo/<board_id>')
-@glo_required
-def show_glo_board(board_id):
-    if not has_glo_access():
-        return redirect(url_for('root'))
-
-    payload = {'access_token' : session['glo_token'], 'fields' : 'name,columns'}
-    r = requests.get(glo_api + '/boards/' + board_id, params=payload)
-    return render_template('dashboard.html', show_glo_board=1, data=r.json())
+@app.route('/dashboard/zenhub-refresh')
+@zen_required
+def zenhub_refresh():
+    boards = []
+    if g.zenhub:
+        repos = g.zenhub.get_repos()
+        for repo in repos:
+            board = g.zenhub.get_board(repo["id"])
+            if board.is_valid():
+                boards.append({'repo_name' : board.repo_fullname, 'repo_id' : board.repo_id})
+    
+    session["zenhub_boards"] = boards
+    return redirect(url_for("/dashboard"))
 
 @app.route('/dashboard/zenhub/<owner>/<repo>')
 @zen_required(github)
 def show_zenhub_board(owner, repo):
-    board = zenhub.Board(g.zenhub, owner + "/" + repo)
-    return render_template('dashboard.html', show_zenhub_board=1, zenhub_board=board)
+    board = g.zenhub.get_board(owner + "/" + repo)
+    return render_template('zenhub_preview.html', zenhub_board=board)
 
 @app.route('/logout')
 def logout():
@@ -159,22 +161,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
 	return render_template('500.html', current_time=datetime.utcnow()), 500
-
-def find_zenhub_boards(force=False):
-    if not force and 'zenhub_boards' in session:
-        return session['zenhub_boards']
-
-    boards = []
-    if has_github_access() and has_zenhub_access():
-        repos = github.get('/user/repos')
-        for repo in repos:
-            r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo['id'], session['zenhub_token']))
-            board = r.json()
-            if is_zenhub_board_valid(board):
-                boards.append({'repo_name' : repo['full_name'], 'repo_id' : repo['id'], 'repo_owner' : repo['owner']['id']})
-                
-        session['zenhub_boards'] = boards
-    return boards
 
 @github.access_token_getter
 def github_token():

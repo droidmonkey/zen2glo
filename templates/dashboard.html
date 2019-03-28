@@ -1,4 +1,4 @@
-{% extends "bootstrap/base.html" %}
+{% extends "base.html" %}
 
 {% block scripts %}
 {{ super() }}
@@ -7,8 +7,6 @@
 
 {% block head %}
 {{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <script>
 	function emptyOrSubmit() {
     	var x;
@@ -28,52 +26,21 @@
   } 
 </style>
 {% endblock %}
-{% block title %}Zen2Glo{% endblock %}
 
-{% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
-	<div class="container">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle"data-toggle="collapse" data-target=".navbar-collapse">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="/">Zen2Glo</a>
-		</div>
-		<div class="navbar-collapse collapse">
-			<ul class="nav navbar-nav">
-				<li><a href='/dashboard'><font color="green">Glo App: Authorized</font></a></li>
-				{% if not github %}
-				<li><a onclick="document.getElementById('githubLoginId').submit();"><font color="red">Authorize GitHub App</font></a></li>
-				{% else %}
-				<li><a  href='/dashboard'><font color="green">GitHub App: Authorized</font></a></li>
-				{% endif %}
-				{% if not zenhub %}
-				<li><a onclick="emptyOrSubmit();"><font color="red">Authorize ZenHub App</font></a></li>
-				{% else %}
-				<li><a  href='/dashboard'><font color="green">ZenHub App: Authorized</font></a></li>
-				{% endif %}
-				<li><a href='/logout'>Logout All Accounts</a></li>
-			</ul>
-		</div>
-	</div>
-</div>
-{% endblock %}
+{% block title %}Zen2Glo{% endblock %}
 
 {% block content %}
 <div class="container">
 	<h2>Welcome to the Dashboard!</h2>
 	<h3>Connection Status:</h3>
 	<p>Glo Boards: <font color="green">Authorized</font></p>
-	{% if github %}
+	{% if session.github_token %}
 		<p>GitHub App: <font color="green">Authorized</font>  (Connected to GitHub: {{ session.github_user_login }})</p>
 	{% else %}
 		<p>GitHub App: <a onclick="document.getElementById('githubLoginId').submit();"><font color="red">Not Authorized</font></a></p>
 		<form id='githubLoginId' action="/login-github" ></form>
 	{% endif %}
-	{% if zenhub %}
+	{% if session.zenhub_token %}
 		<p>ZenHub App: <font color="green">Authorized</font></p>
 	{% else %}
 		<p>ZenHub App: <a onclick="emptyOrSubmit();"><font color="red">Not Authorized</font></a></p>
@@ -83,58 +50,29 @@
 			<p>Enter the ZenHub API Access Token into the box below:</p>
 			<form id='zenhubLoginId' action="/login-zenhub" method="post">
 			ZenHub API Access Token: <input type="text" name="zenhub_token" id='ZenHubTokenFieldId' />
+			<input type="submit" value="Login" />
 		</div>
 	{% endif %}
 
-	</br></br>
-	{% if show_glo_board %}
-	<h3>Glo Board: {{data.name}}</h3>
-		{% for column in data.columns %}
-		<h4>Column: {{column.name}}</h4>
-		<ul>
-			{% for card in column.cards %}
-			<li>{{card.title}}</li>
-			{% endfor %}
-		</ul>
-		{% endfor %}
-	<br/>
-	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
-	<br/>
-	{% elif show_zenhub_board %}
-	<h3>ZenHub Board: {{zenhub_board.board.name}}</h3>
-		{% for pipeline in zenhub_board.pipelines() %}
-		<h4>Pipeline: {{pipeline.name}}</h4>
-		<ul>
-			{% for issue in pipeline.issues %}
-			<li>{{zenhub_board.issue(issue.issue_number).title}}</li>
-			{% endfor %}
-		</ul>
-		{% endfor %}
-	<br/>
-	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
-	<br/>
-	{% else %}
 	<h3>Your Glo Boards</h3>
 	<ul>
 		{% for board in data %}
-		<li><a href="/dashboard/glo/{{board.id}}">{{board.name}}</a></li>
+		<li><a href="https://app.gitkraken.com/glo/board/{{board.id}}" target="_blank">{{board.name}}</a></li>
 		{% else %}
 		<li><em>No Glo Boards Found!</em></li>
 		{% endfor %}
 	</ul>
-	{% endif %}
 
-	{% if github and zenhub %}
-
+	{% if session.github_token and session.zenhub_token %}
 	<h3>Your ZenHub Boards</h3>
 	<ul>
-		{% for board in zenhub_boards %}
+		{% for board in session.zenhub_boards %}
 		<li><a href="/dashboard/zenhub/{{board.repo_name}}">{{board.repo_name}}</a></li>
 		{% else %}
 		<li><em>No ZenHub Workspaces Found!</em></li>
 		{% endfor %}
 	</ul>
-	<a href="/dashboard?refresh"><button>Refresh</button></a>
+	<a href="/dashboard/zenhub-refresh"><button>Refresh</button></a>
 	<a href="/dashboard?testButton"><button>Test!</button></a>
 	<br/><br/>
 	{% endif %}

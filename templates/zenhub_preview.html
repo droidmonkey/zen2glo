@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Zen2Glo - ZenHub Board Preview{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>ZenHub Board: {{zenhub_board.repo_name}}</h3>
+    {% for pipeline in zenhub_board.pipelines %}
+    <h4>Pipeline: {{pipeline.name}}</h4>
+    <ul>
+        {% for issue in pipeline.issues %}
+        <li>{{zenhub_board.github_issue(issue.issue_number).title}}</li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+	<br/>
+	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
+    <br/>
+</div>
+{% endblock %}

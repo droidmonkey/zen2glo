@@ -7,30 +7,50 @@ class ZenHub:
         self.zenhub_token = zenhub_token
         self.github = github
 
+    def get_repos(self):
+        return self.github.get('/user/repos')
+
     def get_board(self, repo_fullname):
-        github_repo = self.github.get('/repos/' + repo_fullname)
-        r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(ZEN_API, github_repo['id'], self.zenhub_token))
-        github_repo['zenhub'] = r.json()
-        return github_repo
+        repo = self.github.get('/repos/' + repo_fullname)
+        issues = self.github.get('/repos/' + repo_fullname + '/issues')
+        r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(ZEN_API, repo['id'], self.zenhub_token))
+        return Board(repo, issues, r.json())
 
     def get_issue(self, board, issue_id):
-        github_issue = self.github.get('/repos/{}/issues/{}'.format(board["full_name"], issue_id))
-        r = requests.get('{}/p1/repositories/{}/issues/{}?access_token={}'.format(ZEN_API, board["id"], issue_id, self.zenhub_token))
-        github_issue['zenhub'] = r.json()
-        return github_issue
+        issue = self.github.get('/repos/{}/issues/{}'.format(board.repo_fullname, issue_id))
+        r = requests.get('{}/p1/repositories/{}/issues/{}?access_token={}'.format(ZEN_API, board.repo_id, issue_id, self.zenhub_token))
+        issue['zenhub'] = r.json()
+        return issue
 
 class Board:
-    def __init__(self, zenhub, repo_fullname):
-        self.zenhub = zenhub
-        self.board = zenhub.get_board(repo_fullname)
-        self.repo_fullname = repo_fullname
-        self.issues = {}
+    def __init__(self, github_repo, github_issues, zenhub_board):
+        self.github_repo = github_repo
+        self.github_issues = github_issues
+        self.zenhub_board = zenhub_board
 
-    def pipelines(self):
-        return self.board['zenhub']['pipelines']
+        # Extract commonly used fields
+        self.repo_name = self.github_repo["name"]
+        self.repo_fullname = self.github_repo["full_name"]
+        self.repo_id = self.github_repo["id"]
+        self.repo_url = self.github_repo["html_url"]
+        self.pipelines = self.zenhub_board.get("pipelines", None)
 
-    def issue(self, issue_id):
-        if issue_id not in self.issues:
-            self.issues[issue_id] = self.zenhub.get_issue(self.board, issue_id)
-        return self.issues[issue_id]
+    # Determine if this is a valid ZenHub board if it contains issues
+    # in any of the pipelines
+    def is_valid(self):
+        for pipeline in self.pipelines:
+            if 'issues' in pipeline and len(pipeline["issues"]) > 0:
+                return True
 
+    def github_issue(self, issue_number):
+        for issue in self.github_issues:
+            if issue["number"] == issue_number:
+                return issue
+        return None
+
+    # Returns list of issues in a pipeline sorted by their position
+    def pipeline_issues(self, pipeline_id):
+        for pipeline in self.pipelines:
+            if pipeline["id"] == pipeline_id:
+                return sorted(pipeline["issues"], key=lambda i: i.get("position", -1))
+        return []

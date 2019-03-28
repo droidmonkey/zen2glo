@@ -1,6 +1,5 @@
 from flask import Flask
-from flask import request, render_template, redirect, url_for, flash
-from flask import session
+from flask import g, session, flash, request, render_template, redirect, url_for
 from flask_github import GitHub
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
@@ -8,6 +7,7 @@ from datetime import datetime
 
 import zenhub
 import gloBoards
+from utils import has_github_access, has_glo_access, has_zenhub_access, glo_required, zen_required
 
 import requests
 import os
@@ -40,7 +40,6 @@ zen_api = 'https://api.zenhub.io'
 client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")
 state = os.getenv("STATEz")
-
 
 @app.route('/')
 def root():
@@ -94,6 +93,7 @@ def login_zenhub():
     return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
+@glo_required
 def dashboard():
     if not has_glo_access():
         return redirect(url_for('root'))
@@ -105,6 +105,7 @@ def dashboard():
         zenhub_boards=find_zenhub_boards('refresh' in request.args))
 
 @app.route('/dashboard/glo/<board_id>')
+@glo_required
 def show_glo_board(board_id):
     if not has_glo_access():
         return redirect(url_for('root'))
@@ -113,14 +114,11 @@ def show_glo_board(board_id):
     r = requests.get(glo_api + '/boards/' + board_id, params=payload)
     return render_template('dashboard.html', show_glo_board=1, data=r.json())
 
-@app.route('/dashboard/zenhub/<owner>/<repo>/<repo_id>')
-def show_zenhub_board(owner, repo, repo_id):
-    if not has_zenhub_access() or not has_github_access():
-        return redirect(url_for('root'))
-
-    repo = github.get('/repos/{}/{}'.format(owner, repo))
-    r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo_id, session['zenhub_token']))
-    return render_template('dashboard.html', show_zenhub_board=1, repo_data=repo, zenhub_data=r.json())
+@app.route('/dashboard/zenhub/<owner>/<repo>')
+@zen_required(github)
+def show_zenhub_board(owner, repo):
+    board = zenhub.Board(g.zenhub, owner + "/" + repo)
+    return render_template('dashboard.html', show_zenhub_board=1, zenhub_board=board)
 
 @app.route('/logout')
 def logout():
@@ -191,15 +189,6 @@ def is_zenhub_board_valid(board):
             if 'issues' in pipeline and len(pipeline['issues']) > 0:
                 return True
     return False
-
-def has_glo_access():
-    return 'glo_token' in session
-
-def has_github_access():
-    return 'github_token' in session
-
-def has_zenhub_access():
-    return 'zenhub_token' in session
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1')

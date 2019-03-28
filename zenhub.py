@@ -1,35 +1,36 @@
 import requests
 
-zen_api = 'https://api.zenhub.io'
+ZEN_API = 'https://api.zenhub.io'
 
-class Issue:
-    def __init__(self, id, position):
-        self.id = id
-        self.position = position
-
-class Pipeline:
-    def __init__(self, name, issues):
-        self.name = name
-        self.issues = issues
-
-class Board:
-    def __init__(self, zenhub_token, github, repo_fullname):
+class ZenHub:
+    def __init__(self, zenhub_token, github):
         self.zenhub_token = zenhub_token
         self.github = github
 
-        # TODO: perform api error checking
-        self.repo = github.get('/repos/' + repo_fullname)
-        
-        r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, self.repo['id'], self.zenhub_token))
-        self.board = r.json()
+    def get_board(self, repo_fullname):
+        github_repo = self.github.get('/repos/' + repo_fullname)
+        r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(ZEN_API, github_repo['id'], self.zenhub_token))
+        github_repo['zenhub'] = r.json()
+        return github_repo
 
-        self._load_pipelines()
+    def get_issue(self, board, issue_id):
+        github_issue = self.github.get('/repos/{}/issues/{}'.format(board["full_name"], issue_id))
+        r = requests.get('{}/p1/repositories/{}/issues/{}?access_token={}'.format(ZEN_API, board["id"], issue_id, self.zenhub_token))
+        github_issue['zenhub'] = r.json()
+        return github_issue
 
-    def _load_pipelines(self):
-        self.pipelines = []
-        for pipeline in self.board['pipelines']:
-            self.pipelines.append(Pipeline(pipeline['name'], pipeline['issues']))
+class Board:
+    def __init__(self, zenhub, repo_fullname):
+        self.zenhub = zenhub
+        self.board = zenhub.get_board(repo_fullname)
+        self.repo_fullname = repo_fullname
+        self.issues = {}
 
-    # Populate issues with GitHub data
-    def populate_issues(self):
-        pass
+    def pipelines(self):
+        return self.board['zenhub']['pipelines']
+
+    def issue(self, issue_id):
+        if issue_id not in self.issues:
+            self.issues[issue_id] = self.zenhub.get_issue(self.board, issue_id)
+        return self.issues[issue_id]
+

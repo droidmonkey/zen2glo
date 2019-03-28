@@ -101,12 +101,12 @@
 	<form action="/dashboard"><input type="submit" value="Go Back" /></form>
 	<br/>
 	{% elif show_zenhub_board %}
-	<h3>ZenHub Board: {{repo_data.name}}</h3>
-		{% for pipeline in zenhub_data.pipelines %}
+	<h3>ZenHub Board: {{zenhub_board.board.name}}</h3>
+		{% for pipeline in zenhub_board.pipelines() %}
 		<h4>Pipeline: {{pipeline.name}}</h4>
 		<ul>
 			{% for issue in pipeline.issues %}
-			<li>{{issue.issue_number}}</li>
+			<li>{{zenhub_board.issue(issue.issue_number).title}}</li>
 			{% endfor %}
 		</ul>
 		{% endfor %}
@@ -129,7 +129,7 @@
 	<h3>Your ZenHub Boards</h3>
 	<ul>
 		{% for board in zenhub_boards %}
-		<li><a href="/dashboard/zenhub/{{board.repo_name}}/{{board.repo_id}}">{{board.repo_name}}</a></li>
+		<li><a href="/dashboard/zenhub/{{board.repo_name}}">{{board.repo_name}}</a></li>
 		{% else %}
 		<li><em>No ZenHub Workspaces Found!</em></li>
 		{% endfor %}

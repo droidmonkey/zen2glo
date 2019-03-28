@@ -2,10 +2,13 @@ import requests
 
 glo_api = 'https://gloapi.gitkraken.com/v1/glo'
 
-class Issue:
-    def __init__(self, id, position):
-        self.id = id
-        self.position = position
+class GloBoardsApi:
+    def __init__(self, client_id, client_secret, state):
+        self.glo_api = glo_api
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.state = state
+        self.payload = {'client_id' : self.client_id, 'state' : self.state, 'scope' : 'board:read'}
 
 class Pipeline:
     def __init__(self, name, issues):

@@ -44,13 +44,15 @@ client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")
 state = os.getenv("STATEz")
 
+
+gloBoardsInst = gloBoards.GloBoardsApi(client_id,client_secret,state)
+
 @app.route('/')
 def root():
     if has_glo_access():
         return redirect(url_for('dashboard'))
     else:
-        payload = {'client_id' : client_id, 'state' : state, 'scope' : 'board:read'}
-        return render_template('index.html', **payload)
+        return render_template('index.html', ****gloBoardsInst.payload)
 
 @app.route('/callback')
 def glo_callback():

@@ -36,3 +36,14 @@ class Board:
     # Populate issues with GitHub data
     def populate_issues(self):
         pass
+
+def transfer_zen_to_glo(zen_board):
+    # Glo API calls
+    # 1. Create glo board (zen board name)
+    # 2. Create Columns from pipelines
+    # 3. Create Cards from Issues
+    # 4. Import GitHub labels
+    pass
+
+def transfer_github_to_glo(github_project):
+    pass

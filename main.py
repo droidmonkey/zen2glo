@@ -99,7 +99,9 @@ def login_zenhub():
 @app.route('/dashboard')
 @glo_required
 def dashboard():
-    return render_template('dashboard.html', glo_data=g.glo.get_boards())
+    glo_boards = g.glo.get_boards()
+    [board.add_cards(g.glo.get_cards(board.id)) for board in glo_boards]
+    return render_template('dashboard.html', glo_data=glo_boards)
 
 @app.route('/dashboard/zenhub-refresh')
 @zen_required(github)

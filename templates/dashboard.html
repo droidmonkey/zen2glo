@@ -57,7 +57,7 @@
 	<h3>Your Glo Boards</h3>
 	<ul>
 		{% for board in glo_data %}
-		<li><a href="https://app.gitkraken.com/glo/board/{{board.id}}" target="_blank">{{board.name}}</a></li>
+		<li><a href="https://app.gitkraken.com/glo/board/{{board.id}}" target="_blank">{{board.name}} ({{board.cards|length}} cards)</a></li>
 		{% else %}
 		<li><em>No Glo Boards Found!</em></li>
 		{% endfor %}

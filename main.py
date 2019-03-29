@@ -43,23 +43,14 @@ zen_api = 'https://api.zenhub.io'
 client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")
 state = os.getenv("STATEz")
-#DEBUG
-print(f'main.py Line 47 ')
-# Initiate gloBoards API Class Instance
-gloBoardsInst = gloBoards.GloBoardsApi()
-#DEBUG
-print(f'main.py Line 51 ')
+
 
 @app.route('/')
 def root():
     if has_glo_access():
-        #DEBUG
-        print(f'main.py Line 57 ')
         return redirect(url_for('dashboard'))
     else:
         payload = {'client_id' : client_id, 'state' : state, 'scope' : 'board:read'}
-        #DEBUG
-        print(f'main.py Line 62 ')
         return render_template('index.html', **payload)
 
 @app.route('/callback')
@@ -73,12 +64,7 @@ def glo_callback():
         if 'access_token' in data:
             session.permanent = True
             session['glo_token'] = data['access_token']
-            gloBoardsInst.init_instance(data['access_token']) 
-            #DEBUG
-            print(f'main.py Line 78')
         else:
-            #DEBUG
-            print(f'main.py Line 81')
             return "ERROR: Failed to authorize with Glo!"
 
     return redirect(url_for('dashboard'))
@@ -113,12 +99,7 @@ def login_zenhub():
 @app.route('/dashboard')
 @glo_required
 def dashboard():
-    #payload = {'access_token' : session['glo_token']}
-    #r = requests.get(glo_api + '/boards', params=payload)
-    #return render_template('dashboard.html', data=r.json())
-    #DEBUG
-    print(f'main.py Line 120')
-    return render_template('dashboard.html', data = gloBoardsInst.get_boards())
+    return render_template('dashboard.html', glo_data=g.glo.get_boards())
 
 @app.route('/dashboard/zenhub-refresh')
 @zen_required(github)
@@ -142,26 +123,8 @@ def show_zenhub_board(owner, repo):
 
 @app.route('/logout')
 def logout():
-    gloLoggedOut = False
-    zenLoggedOut = False
-    gitLoggedOut = False
-    glo_logout = session.pop('glo_token', None)
-    zen_logout = session.pop('zenhub_token', None)
-    git_logout = session.pop('github_token', None)
-    if glo_logout is not None:
-        print('Logged out of Glo')
-        gloLoggedOut = True
-
-    if zen_logout is not None:
-        print('Logged out of ZenHub')
-        zenLoggedOut = True
-
-    if git_logout is not None:
-        print('Logged out of Github')
-        gitLoggedOut = True
-
-    LoggedOutSuccesses = {'gloLoggedOut' : gloLoggedOut, 'zenLoggedOut' : zenLoggedOut, 'gitLoggedOut': gitLoggedOut}
-    return render_template('logoutSuccess.html', LoggedOutSuccesses=LoggedOutSuccesses)
+    session.clear()
+    return render_template('logoutSuccess.html')
 
 
 @app.errorhandler(404)

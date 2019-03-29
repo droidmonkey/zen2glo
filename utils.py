@@ -1,5 +1,6 @@
 from flask import g, session, flash, redirect, url_for
 from zenhub import ZenHub
+from gloBoards import GloBoardsApi
 from functools import wraps
 
 def has_glo_access():
@@ -17,6 +18,7 @@ def glo_required(f):
         if not has_glo_access():
             flash("Glo login is required to access!")
             return redirect(url_for('root'))
+        g.glo = GloBoardsApi(session["glo_token"])
         return f(*args, **kwargs)
     return decorated_function
 

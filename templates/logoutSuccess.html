@@ -54,15 +54,9 @@
 {% block content %}
 <h2>Logging out:</h2>  
 <ul>
-  {% if LoggedOutSuccesses.gloLoggedOut %}
     <li><p>Glo Boards Successfully Logged Out</p></li>
-  {% endif %}
-  {% if LoggedOutSuccesses.gitLoggedOut %}
     <li><p>GitHub Successfully Logged Out</p></li>
-  {% endif %}
-  {% if LoggedOutSuccesses.zenLoggedOut %}
     <li><p>ZenHub Successfully Logged Out</p></li>
-  {% endif %}
 </ul>
 <div>Redirecting to <a href='/'>home</a> in <span id="time">00:05</span></div>
 {% endblock %}

@@ -1,24 +1,49 @@
 import requests
+from flask import session
 
 glo_api = 'https://gloapi.gitkraken.com/v1/glo'
 
+# Class GloBoardsApi init instance creates session variable token
 class GloBoardsApi:
-    def __init__(self, client_id, client_secret, state):
-        self.glo_api = glo_api
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.state = state
-        self.payload = {'client_id' : self.client_id, 'state' : self.state, 'scope' : 'board:read'}
+    def __init__(self):
+        self.gloBoardsToken = []
+        print(f'gloBoards.py Line 10')
+    def init_instance(self, gloBoardsToken):
+        self.gloBoardsToken = gloBoardsToken
+        self.payload = {'access_token': gloBoardsToken}
+        #DEBUG
+        print(f'gloBoards.py Line 15')
 
-class Pipeline:
-    def __init__(self, name, issues):
-        self.name = name
-        self.issues = issues
+    def get_boards(self):
+        if hasattr(self,'payload'): 
+            r = requests.get(glo_api + '/boards', params = self.payload)
+            boards = r.json()
+            return boards
+        else:
+            print(f'gloBoards.py Line 23: ')
 
-class Board:
-    def __init__(self, zenhub_token, github, repo_fullname):
-        self.zenhub_token = zenhub_token
-        self.github = github
+    
+    def get_columns(self):
+        pass
+
+    def get_cards(self):
+        pass
+
+    def get_labels(self):
+        pass
+
+    def get_attachments(self):
+        pass
+
+    def get_comments(self):
+        pass
+    
+    def get_userInfo(self):
+        pass
+'''
+class GloBoard:
+    def __init__(self, gloBoardsToken):
+        self.gloBoardsToken = gloBoardsToken
 
         # TODO: perform api error checking
         self.repo = github.get('/repos/' + repo_fullname)
@@ -36,7 +61,9 @@ class Board:
     # Populate issues with GitHub data
     def populate_issues(self):
         pass
-
+'''
+# Performs a full one-way transfer from zenhub to glo
+# Does not link back to GitHub
 def transfer_zen_to_glo(zen_board):
     # Glo API calls
     # 1. Create glo board (zen board name)

@@ -43,16 +43,24 @@ zen_api = 'https://api.zenhub.io'
 client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")
 state = os.getenv("STATEz")
-
-
-gloBoardsInst = gloBoards.GloBoardsApi(client_id,client_secret,state)
+#DEBUG
+print(f'main.py Line 47 ')
+# Initiate gloBoards API Class Instance
+gloBoardsInst = gloBoards.GloBoardsApi()
+#DEBUG
+print(f'main.py Line 51 ')
 
 @app.route('/')
 def root():
     if has_glo_access():
+        #DEBUG
+        print(f'main.py Line 57 ')
         return redirect(url_for('dashboard'))
     else:
-        return render_template('index.html', **gloBoardsInst.payload)
+        payload = {'client_id' : client_id, 'state' : state, 'scope' : 'board:read'}
+        #DEBUG
+        print(f'main.py Line 62 ')
+        return render_template('index.html', **payload)
 
 @app.route('/callback')
 def glo_callback():
@@ -65,7 +73,12 @@ def glo_callback():
         if 'access_token' in data:
             session.permanent = True
             session['glo_token'] = data['access_token']
+            gloBoardsInst.init_instance(data['access_token']) 
+            #DEBUG
+            print(f'main.py Line 78')
         else:
+            #DEBUG
+            print(f'main.py Line 81')
             return "ERROR: Failed to authorize with Glo!"
 
     return redirect(url_for('dashboard'))
@@ -100,9 +113,12 @@ def login_zenhub():
 @app.route('/dashboard')
 @glo_required
 def dashboard():
-    payload = {'access_token' : session['glo_token']}
-    r = requests.get(glo_api + '/boards', params=payload)
-    return render_template('dashboard.html', data=r.json())
+    #payload = {'access_token' : session['glo_token']}
+    #r = requests.get(glo_api + '/boards', params=payload)
+    #return render_template('dashboard.html', data=r.json())
+    #DEBUG
+    print(f'main.py Line 120')
+    return render_template('dashboard.html', data = gloBoardsInst.get_boards())
 
 @app.route('/dashboard/zenhub-refresh')
 @zen_required(github)
@@ -147,12 +163,7 @@ def logout():
     LoggedOutSuccesses = {'gloLoggedOut' : gloLoggedOut, 'zenLoggedOut' : zenLoggedOut, 'gitLoggedOut': gitLoggedOut}
     return render_template('logoutSuccess.html', LoggedOutSuccesses=LoggedOutSuccesses)
 
-'''
-@app.route('/logoutSuccess')
-def logoutSuccess():
-    LoggedOutSuccesses
-    return render_template('logoutSuccess.html', **LoggedOutSuccesses)
-'''
+
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html',current_time=datetime.utcnow()), 404

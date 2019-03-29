@@ -31,11 +31,10 @@ class GloBoardsApi:
         payload["per_page"] = 100
         return self._get_multiple_pages(GLO_API + '/boards/{}/cards'.format(board_id), payload)
 
-    def get_labels(self):
-        pass
-
-    def get_attachments(self):
-        pass
+    def get_attachments(self, board_id, card_id):
+        payload = self.glo_token
+        payload["per_page"] = 100
+        return self._get_multiple_pages(GLO_API + '/boards/{}/cards/{}/attachments'.format(board_id,card_id), payload)
 
     def get_comments(self):
         pass

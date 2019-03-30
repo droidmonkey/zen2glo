@@ -1,5 +1,6 @@
-GitHub-Flask==3.2.0
 Flask==1.0.2
 requests==2.21.0
 Flask-Bootstrap==3.3.7.1
 Flask-Moment==0.7.0
+Flask-DotEnv==0.1.1
+GitHub-Flask==3.2.0

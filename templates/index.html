@@ -5,23 +5,12 @@
 {% block content %}
 	<h1>Zen2Glo Migration</h1>
 	<h2>Import ZenHub Boards directly to your Glo Boards</h2>
-	<h2><a onclick="document.getElementById('AuthGloAppId').submit();">Start by pressing 'Authorize Glo App' above!</a></h2>
 	<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
 		<input type="hidden" name="response_type" value="code" />
 		<input type="hidden" name="client_id" value="{{client_id}}" />
 		<input type="hidden" name="state" value="{{state}}" />
 		<input type="hidden" name="scope" value="{{scope}}" />
+
+		<button type="submit">Authorize Glo Access</button>
 	</form>
-	<!--
-	<ul>
-		<li>
-			<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
-			<input type="hidden" name="response_type" value="code" />
-			<input type="hidden" name="client_id" value="{{client_id}}" />
-			<input type="hidden" name="state" value="{{state}}" />
-			<input type="hidden" name="scope" value="{{scope}}" />
-			<input type="submit" value="Authorize Glo App" />
-		</form>
-		</li>
-	</ul>-->
 {% endblock %}

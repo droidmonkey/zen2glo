@@ -28,22 +28,9 @@ app.config['GITHUB_CLIENT_SECRET'] = os.getenv('GITHUB_SECRET')
 
 github = GitHub(app)
 
-## TODO Remove glo_api below once gloBoards.py is working
-glo_api = 'https://gloapi.gitkraken.com/v1/glo'
-## TODO Remove zen_api below once zenhub.py is working
-zen_api = 'https://api.zenhub.io'
-
-# Glo API Credentials for Jon
-#client_id = os.getenv("CLIENT_IDj")
-#client_secret = os.getenv("CLIENT_SECRETj")
-#state = os.getenv("STATEj")
-
-## TODO Remove glo api credentials below once gloBoards.py is working
- # Glo API Credentials for Z
 client_id = os.getenv("CLIENT_IDz")
 client_secret = os.getenv("CLIENT_SECRETz")
 state = os.getenv("STATEz")
-
 
 @app.route('/')
 def root():
@@ -86,14 +73,12 @@ def authorized(oauth_token):
     github_user = github.get('/user')
     session['github_user_id'] = github_user['id']
     session['github_user_login'] = github_user['login']
-
     return redirect(next_url)
 
 @app.route('/login-zenhub', methods=['POST'])
 def login_zenhub():
     if not has_zenhub_access() and request.form.get('zenhub_token'):
         session['zenhub_token'] = request.form.get('zenhub_token')
-
     return redirect(url_for('zenhub_refresh'))
 
 @app.route('/dashboard')
@@ -107,12 +92,11 @@ def dashboard():
 @zen_required(github)
 def zenhub_refresh():
     boards = []
-    if g.zenhub:
-        repos = g.zenhub.get_repos()
-        for repo in repos:
-            board = g.zenhub.get_board(repo["full_name"])
-            if board.is_valid():
-                boards.append({'repo_name' : board.repo_fullname, 'repo_id' : board.repo_id})
+    repos = g.zenhub.get_repos()
+    for repo in repos:
+        board = g.zenhub.get_board(repo["full_name"])
+        if board.is_valid():
+            boards.append({'repo_name' : board.repo_fullname, 'repo_id' : board.repo_id})
     
     session["zenhub_boards"] = boards
     return redirect(url_for("dashboard"))
@@ -141,18 +125,6 @@ def internal_server_error(e):
 def github_token():
     if has_github_access():
         return session['github_token']
-
-def get_zenhub_board(repo_id):
-    if repo_id:
-        r = requests.get('{}/p1/repositories/{}/board?access_token={}'.format(zen_api, repo_id, session['zenhub_token']))
-        return r.json()
-
-def is_zenhub_board_valid(board):
-    if 'pipelines' in board:
-        for pipeline in board['pipelines']:
-            if 'issues' in pipeline and len(pipeline['issues']) > 0:
-                return True
-    return False
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1')

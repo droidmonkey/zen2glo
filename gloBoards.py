@@ -33,14 +33,21 @@ class GloBoardsApi:
 
     def get_attachments(self, board_id, card_id):
         payload = self.glo_token
-        payload["per_page"] = 100
-        return self._get_multiple_pages(GLO_API + '/boards/{}/cards/{}/attachments'.format(board_id,card_id), payload)
+        r = requests.get(GLO_API + '/boards/{}/cards/{}/attachments'.format(board_id,card_id), params=payload)
+        data=r.json()
+        return data
 
-    def get_comments(self):
-        pass
+    def get_comments(self, board_id, card_id):
+        payload = self.glo_token
+        r = requests.get(GLO_API + '/boards/{}/cards/{}/comments'.format(board_id,card_id), params=payload)
+        data=r.json()
+        return data
     
     def get_userInfo(self):
-        pass
+        payload = self.glo_token
+        r = requests.get(GLO_API + '/user', params=payload)
+        data=r.json()
+        return data
     
     def move_card(self, board_id, card_id, new_column_id):
         payload = {"column_id" : new_column_id}

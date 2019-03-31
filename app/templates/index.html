@@ -5,15 +5,22 @@
 {% block content %}
 {{ super() }}
 <div class="container">
+	<div class="jumbotron" style="background-image:url(static/space.jpg); background-size: cover;
+    background-repeat: no-repeat; color: white;
+	text-shadow: black 0.3em 0.3em 0.3em; height: 400px;" >
+	
 	<h1>Zen2Glo Migration</h1>
-	<h2>Import ZenHub Boards directly to your Glo Boards</h2>
+	</br></br></br>
+	<p>Import ZenHub Boards directly to your Glo Boards</p>
+
 	<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
 		<input type="hidden" name="response_type" value="code" />
 		<input type="hidden" name="client_id" value="{{client_id}}" />
 		<input type="hidden" name="state" value="{{state}}" />
 		<input type="hidden" name="scope" value="{{scope}}" />
 
-		<button type="submit">Authorize Glo Access</button>
+		<button class="btn btn-default" type="submit">Authorize Glo Access</button>
 	</form>
+</div>
 </div>
 {% endblock %}

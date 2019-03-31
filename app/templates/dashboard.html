@@ -24,6 +24,21 @@
 .boxed {
 	border: 1px solid red ;
   } 
+#wrapper {
+	border: 1px solid black;
+	overflow: hidden; /* add this to contain floated children */
+}
+#GloDiv {
+	float:left; 
+}
+#LeftArrow{
+	float:left;
+	width: 300px;
+	padding-left: 50px;
+}
+#ZenDiv {
+	float: left;
+}
 </style>
 {% endblock %}
 
@@ -32,7 +47,7 @@
 {% block content %}
 {{ super() }}
 <div class="container">
-	<h2>Welcome to the Dashboard!</h2>
+	<h2>Zen2Glo Dashboard:</h2>
 	<h3>Connection Status:</h3>
 	<p>Glo Boards: <font color="green">Authorized</font></p>
 	{% if session.github_token %}
@@ -54,30 +69,43 @@
 			<input type="submit" value="Login" />
 		</div>
 	{% endif %}
-
+	
 	<form action="/dashboard/match" method="GET">
-	<h3>Your Glo Boards</h3>
-	<ul>
-		{% for board in glo_data %}
-		<li><input type="radio" value="{{board.id}}" name="glo_board_id" /> <a href="https://app.gitkraken.com/glo/board/{{board.id}}" target="_blank">{{board.name}} ({{board.cards|length}} cards)</a></li>
-		{% else %}
-		<li><em>No Glo Boards Found!</em></li>
-		{% endfor %}
-	</ul>
-
-	{% if session.github_token and session.zenhub_token %}
-	<h3>Your ZenHub Boards</h3>
-	<ul>
-		{% for board in session.zenhub_boards %}
-		<li><input type="radio" value="{{board.repo_name}}" name="zen_board_id" /> <a href="/dashboard/zenhub/{{board.repo_name}}">{{board.repo_name}}</a></li>
-		{% else %}
-		<li><em>No ZenHub Workspaces Found!</em></li>
-		{% endfor %}
-	</ul>
-	<a href="/dashboard/zenhub-refresh"><button>Refresh ZenHub Boards</button></a>
-	<br/><br/>
-	<input type="submit" value="Transfer Zen 2 Glo" />
-	{% endif %}
+	<h3>Your Boards:</h3>
+	<div id="wrapper">
+		<div id="GloDiv">
+			<h3>Glo Boards</h3>
+			<ul>
+				{% for board in glo_data %}
+				<li><input type="radio" value="{{board.id}}" name="glo_board_id" /> <a href="https://app.gitkraken.com/glo/board/{{board.id}}" target="_blank">{{board.name}} ({{board.cards|length}} cards)</a></li>
+				{% else %}
+				<li><em>No Glo Boards Found!</em></li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% if session.github_token and session.zenhub_token %}
+		<div id="LeftArrow">
+			<img src="static/arrowLeft.jpg" width="200">
+		</div>
+		{% endif %}
+		<div id="ZenDiv">
+			{% if session.github_token and session.zenhub_token %}
+			<h3>ZenHub Boards</h3>
+			<ul>
+				{% for board in session.zenhub_boards %}
+				<li><input type="radio" value="{{board.repo_name}}" name="zen_board_id" /> <a href="/dashboard/zenhub/{{board.repo_name}}">{{board.repo_name}}</a></li>
+				{% else %}
+				<li><em>No ZenHub Workspaces Found!</em></li>
+				{% endfor %}
+			</ul>
+			
+			<br/><br/>
+			
+		{% endif %}
+		</div>
+	</div>
+	<a href="/dashboard/zenhub-refresh"><button>Refresh Boards</button></a>
+	<input type="submit" value="Transfer ZenBoard To GloBoard" />
 	</form>
 </div>
 {% endblock %}

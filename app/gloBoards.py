@@ -6,83 +6,87 @@ GLO_API = 'https://gloapi.gitkraken.com/v1/glo'
 # Interface with the Glo API
 class GloBoardsApi:
     def __init__(self, glo_token):
-        self.glo_token = glo_token
-        self.def_params = self._build_params()
+        self.auth_header = {"Authorization": f"Bearer {glo_token}"}
+        self._reset()
+
+    def _reset(self):
         self.last_message = ""
+        self.last_url = ""
+        self.last_hasmore = False
 
-    def _build_params(self, additional_params={}):
-        params = {"access_token": self.glo_token}
-        params.update(additional_params)
-        return params
+    def _send_request(self, endpoint, method="get", params={}, payload={}):
+        self._reset()
+        self.last_url = f"{GLO_API}/{endpoint}"
+        method = method.lower()
 
-    def _get_multiple_pages(self, api, params):
-        data = []
+        try:
+            if method == "get":
+                r = requests.get(self.last_url, headers=self.auth_header, params=params)
+            elif method == "post":
+                r = requests.post(self.last_url, headers=self.auth_header, params=params, json=payload)
+            elif method == "delete":
+                r = requests.delete(self.last_url, headers=self.auth_header)
+            else:
+                raise TypeError(f"Invalid request method {method} passed.")
+
+            # Raise an HTTPError if we receive a bad response
+            r.raise_for_status()
+
+            # Return the json package
+            self.last_hasmore = r.headers.get("has-more", "false") == "true"
+            return r.json()
+        except requests.exceptions.RequestException as e:
+            self.last_message = e.response.json().get("message", str(e))
+            return None
+
+    def _get_multiple_pages(self, endpoint, params={}):
+        ret = []
         page = 1
-        has_more = "true"
-        while strtobool(has_more):
+        self.last_hasmore = True
+        while self.last_hasmore:
             params["page"] = page
-            r = requests.get(api, params=params)
-            data.extend(r.json())
-            has_more = r.headers.get("has-more", "false")
+            data = self._send_request(endpoint, params=params)
+            if data:
+                ret.extend(data)
+            else:
+                return None
             page += 1
         return data
 
     def get_board(self, board_id):
-        params = self._build_params({"fields": "columns,name"})
-        r = requests.get(f"{GLO_API}/boards/{board_id}", params=params)
-        if r.status_code == 200:
+        board = self._send_request(f"boards/{board_id}", params={"fields": "columns,name"})
+        if board:
             cards = self.get_cards(board_id)
-            return GloBoard(r.json(), cards)
-        else:
-            self.last_message = r.json()["message"]
+            return GloBoard(board, cards)
 
     def get_boards(self):
-        params = self._build_params({"fields": "columns,name"})
-        boards = self._get_multiple_pages(f"{GLO_API}/boards", params)
-        return [GloBoard(x) for x in boards]
+        boards = self._get_multiple_pages("boards", params={"fields": "columns,name"})
+        if boards:
+            return [GloBoard(x) for x in boards]
 
     def get_cards(self, board_id):
-        params = self._build_params({"per_page": 100})
-        return self._get_multiple_pages(f"{GLO_API}/boards/{board_id}/cards", params=params)
+        return self._get_multiple_pages(f"boards/{board_id}/cards", params={"per_page": 100})
 
     def get_attachments(self, board_id, card_id):
-        r = requests.get(GLO_API + '/boards/{}/cards/{}/attachments'.format(board_id,card_id), params=self.def_params)
-        data=r.json()
-        return data
+        return self._send_request(f"boards/{board_id}/cards/{card_id}/attachments")
 
     def get_comments(self, board_id, card_id):
-        r = requests.get(GLO_API + '/boards/{}/cards/{}/comments'.format(board_id,card_id), params=self.def_params)
-        data=r.json()
-        return data
+        return self._send_request(f"boards/{board_id}/cards/{card_id}/comments")
     
     def get_userInfo(self):
-        r = requests.get(GLO_API + '/user', params=self.def_params)
-        data=r.json()
-        return data
+        return self._send_request("user")
     
     def save_card(self, board_id, card):
-        r = requests.post(f"{GLO_API}/boards/{board_id}/cards/{card['id']}", 
-                          json=card, 
-                          params=self.def_params)
-        if r.status_code == 200:
-            return r.json()
-        else:
-            self.last_message = r.json()["message"]
+        return self._send_request(f"boards/{board_id}/cards/{card['id']}", method="post", payload=card)
 
-    def create_card(self, board_id, card_data):
-        requests.post(f"{GLO_API}/boards/{board_id}/cards", json=card_data, params=self.def_params)
+    def create_card(self, board_id, card):
+        return self._send_request(f"boards/{board_id}/cards", method="post", payload=card)
 
     def batch_cards(self, board_id, cards):
-        requests.post(f"{GLO_API}/boards/{board_id}/cards/batch", json=cards, params=self.def_params)
+        return self._send_request(f"boards/{board_id}/cards/batch", method="post", payload=cards)
 
     def create_column(self, board_id, column_name, position=0):
-        r = requests.post(f"{GLO_API}/boards/{board_id}/columns", 
-                          json={"name": column_name, "position": position},
-                          params=self.def_params)
-        if r.status_code == 201:
-            return r.json()
-        else:
-            self.last_message = r.json()["message"]
+        return self._send_request(f"boards/{board_id}/columns", method="post", payload={"name": column_name, "position": position})
 
 # Definition for a Glo Board
 # Returned as a result of calling get_boards from the API
@@ -95,6 +99,16 @@ class GloBoard:
         self.name = self.board_data["name"]
         self.columns = self.board_data["columns"]
 
+    def find_card(self, id="", name=""):
+        for card in self.cards:
+            if card["id"] == id or card["name"] == name:
+                return card
+
+    def find_column(self, id="", name=""):
+        for column in self.columns:
+            if column["id"] == id or column["name"] == name:
+                return column
+
     def add_cards(self, glo_cards):
         self.cards = glo_cards
 
@@ -104,24 +118,22 @@ class GloBoard:
             cards.sort(key=lambda x: x.get("position", -1))
             return cards
 
-    def card_by_name(self, card_name):
-        for card in self.cards:
-            if card["name"] == card_name:
-                return card
-
 def match_glo_to_zen(glo_api, glo_board, zen_board):
     # Create columns to match ZenHub pipelines
     position = len(glo_board.columns)
     for pipeline in zen_board.pipelines:
-        column = glo_api.create_column(glo_board.id, pipeline["name"], position)
+        # Find or create a column for this pipeline
+        column = glo_board.find_column(name=pipeline["name"])
         if not column:
-            return False, f"Failed to create new column {pipeline['name']}; {glo_api.last_message}"
+            column = glo_api.create_column(glo_board.id, pipeline["name"], position)
+            if not column:
+                return False, f"Failed to create new column {pipeline['name']}; {glo_api.last_message}"
         
         # Move existing glo cards into new columns
         for issue in sorted(pipeline["issues"], key=lambda x: x.get("position", -1)):
             github_issue = zen_board.github_issue(issue["issue_number"])
             if github_issue:
-                card = glo_board.card_by_name(github_issue["title"])
+                card = glo_board.find_card(name=github_issue["title"])
                 if card:
                     card["position"] = issue["position"]
                     card["column_id"] = column["id"]

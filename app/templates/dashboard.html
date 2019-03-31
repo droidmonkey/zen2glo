@@ -90,7 +90,7 @@
 		{% endif %}
 		<div id="ZenDiv">
 			{% if session.github_token and session.zenhub_token %}
-			<h3>ZenHub Boards</h3>
+			<h3>ZenHub Workspaces</h3>
 			<ul>
 				{% for board in session.zenhub_boards %}
 				<li><input type="radio" value="{{board.repo_name}}" name="zen_board_id" /> <a href="/dashboard/zenhub/{{board.repo_name}}">{{board.repo_name}}</a></li>
@@ -98,14 +98,14 @@
 				<li><em>No ZenHub Workspaces Found!</em></li>
 				{% endfor %}
 			</ul>
-			
+			<a href="/dashboard/zenhub-refresh"><button type="button" class="btn btn-primary">Refresh ZenHub Workspaces</button></a>
 			<br/><br/>
 			
 		{% endif %}
 		</div>
 	</div>
-	<a href="/dashboard/zenhub-refresh"><button type="button" class="btn btn-primary">Refresh Boards</button></a>
-	<button type="submit" class="btn btn-primary">Transfer ZenBoard To GloBoard</button>
+	<br/>
+	<center><button type="submit" class="btn btn-primary">Transfer ZenHub Workspace to GloBoard</button></center>
 	</form>
 </div>
 {% endblock %}

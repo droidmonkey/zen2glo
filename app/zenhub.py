@@ -52,5 +52,8 @@ class Board:
     def pipeline_issues(self, pipeline_id):
         for pipeline in self.pipelines:
             if pipeline["id"] == pipeline_id:
-                return sorted(pipeline["issues"], key=lambda x: x.get("position", -1))
+                return self.sorted_issues(pipeline["issues"])
         return []
+
+    def sorted_issues(self, issues):
+        return issues.sort(key=lambda x: x.get("position", -1))

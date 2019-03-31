@@ -85,6 +85,25 @@ def show_zenhub_board(owner, repo):
     board = g.zenhub.get_board(owner + "/" + repo)
     return render_template('zenhub_preview.html', zenhub_board=board)
 
+@main.route('/dashboard/match')
+@glo_required
+@zen_required(github)
+def match():
+    glo_board_id = request.args.get("glo_board_id", None)
+    zen_board_id = request.args.get("zen_board_id", None)
+    
+    if glo_board_id and zen_board_id:
+        glo_board = g.glo.get_board(glo_board_id)
+        zen_board = g.zenhub.get_board(zen_board_id)
+
+        status, message = gloBoards.match_glo_to_zen(g.glo, glo_board, zen_board)
+        if status:
+            flash(f"Transfer to Glo Board {glo_board.name} successful!")
+        else:
+            flash(f"Transfer failed: {message}!", "error")
+
+    return redirect(url_for(".dashboard"))
+
 @main.route('/logout')
 def logout():
     session.clear()

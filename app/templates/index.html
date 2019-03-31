@@ -3,6 +3,8 @@
 {% block title %}Zen2Glo{% endblock %}
 
 {% block content %}
+{{ super() }}
+<div class="container">
 	<h1>Zen2Glo Migration</h1>
 	<h2>Import ZenHub Boards directly to your Glo Boards</h2>
 	<form id="AuthGloAppId" action="https://app.gitkraken.com/oauth/authorize" method="get">
@@ -13,4 +15,5 @@
 
 		<button type="submit">Authorize Glo Access</button>
 	</form>
+</div>
 {% endblock %}

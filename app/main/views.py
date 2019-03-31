@@ -43,7 +43,7 @@ def login_github():
 def authorized(oauth_token):
     next_url = url_for('.dashboard')
     if oauth_token is None:
-        flash("Authorization failed.")
+        flash("Authorization failed.", "danger")
         return redirect(next_url)
 
     session['github_token'] = oauth_token
@@ -62,8 +62,7 @@ def login_zenhub():
 @main.route('/dashboard')
 @glo_required
 def dashboard():
-    glo_boards = g.glo.get_boards()
-    [board.add_cards(g.glo.get_cards(board.id)) for board in glo_boards]
+    glo_boards = sorted(g.glo.get_boards(), key=lambda x: x.name.lower())
     return render_template('dashboard.html', glo_data=glo_boards)
 
 @main.route('/dashboard/zenhub-refresh')
@@ -98,9 +97,9 @@ def match():
 
         status, message = gloBoards.match_glo_to_zen(g.glo, glo_board, zen_board)
         if status:
-            flash(f"Transfer to Glo Board {glo_board.name} successful!")
+            flash(f"Transfer to Glo Board {glo_board.name} successful!", "success")
         else:
-            flash(f"Transfer failed: {message}!", "error")
+            flash(f"Transfer failed: {message}!", "danger")
 
     return redirect(url_for(".dashboard"))
 

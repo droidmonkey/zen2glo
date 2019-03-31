@@ -18,6 +18,8 @@ The Glo API has no way to tell if a Github repo is synced to a board, and what c
 
 Login to ZenHub and generate a ZenHub API Access Token here:
 https://app.zenhub.com/dashboard/tokens
+
 *Note: this link is included in the website where necessary.
+
 Save the ZenHub API Access Token locally and enter it into the Zen2Glo Application when requested.
 

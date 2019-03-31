@@ -100,9 +100,10 @@ class GloBoard:
         self.columns = self.board_data["columns"]
 
     def find_card(self, id="", name=""):
-        for card in self.cards:
-            if card["id"] == id or card["name"] == name:
-                return card
+        if self.cards:
+            for card in self.cards:
+                if card["id"] == id or card["name"] == name:
+                    return card
 
     def find_column(self, id="", name=""):
         for column in self.columns:
@@ -135,8 +136,7 @@ def match_glo_to_zen(glo_api, glo_board, zen_board):
             if github_issue:
                 card = glo_board.find_card(name=github_issue["title"])
                 if card:
-                    card["position"] = issue["position"]
-                    card["column_id"] = column["id"]
+                    card = {"id": card["id"], "position": card.get("position",0), "column_id": column["id"]}
                     if not glo_api.save_card(glo_board.id, card):
                         return False, f"Failed to move card {github_issue['title']}; {glo_api.last_message}"
         

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3.7
 from flup.server.fcgi import WSGIServer
 from app import create_app
 
